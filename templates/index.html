@@ -1,0 +1,69 @@
+<!-- templates/index.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mb-2">
+        <div class="col-auto">
+            <p class="lead small-instructions text-center mb-1">
+                <i class="fas fa-info-circle"></i> 
+                Position your face so that your <strong id="selected-eye">left</strong> eye is within the green box.
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center mb-3">
+        <div class="col-auto">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Eye Selection">
+                <input type="radio" class="btn-check" name="eyeOptions" id="leftEye" value="left" autocomplete="off" checked>
+                <label class="btn btn-outline-primary btn-sm" for="leftEye">Left Eye</label>
+                
+                <input type="radio" class="btn-check" name="eyeOptions" id="rightEye" value="right" autocomplete="off">
+                <label class="btn btn-outline-primary btn-sm" for="rightEye">Right Eye</label>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Video and Overlay Container -->
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <div class="video-overlay-container">
+                <video id="video" autoplay playsinline width="480" height="360"></video>
+                <canvas id="overlay" width="480" height="360"></canvas>
+                <div class="alignment-overlay"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center mt-2">
+        <div class="col-auto">
+            <button id="capture-btn" class="btn btn-secondary btn-md" disabled>
+                <i class="fas fa-camera"></i> Capture
+            </button>
+        </div>
+    </div>
+    
+    <div id="feedback" class="row justify-content-center mt-2">
+        <div class="col-auto"></div>
+    </div>
+</div>
+
+<!-- Modal for Confirmation -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Captured Eye</h5>
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="captured-image" src="" alt="Captured Eye" class="img-fluid">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Retry</button>
+                <button type="button" class="btn btn-primary btn-sm" id="save-image-btn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

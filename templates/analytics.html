@@ -1,0 +1,83 @@
+<!-- templates/analytics.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Analytics</h2>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Captures</h5>
+                    <p class="card-text display-4">{{ total_captures }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Captures Over Time</h5>
+                    <canvas id="capturesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('capturesChart').getContext('2d');
+    const capturesChart = new Chart(ctx, {
+        type: 'line', // You can change this to 'bar', 'pie', etc.
+        data: {
+            labels: {{ dates | tojson }},
+            datasets: [{
+                label: 'Number of Captures',
+                data: {{ counts | tojson }},
+                backgroundColor: 'rgba(0, 200, 83, 0.2)', // Semi-transparent green
+                borderColor: 'rgba(0, 200, 83, 1)', // Solid green
+                borderWidth: 1,
+                fill: true,
+                tension: 0.4 // Smooth curves
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Captures'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false // Hide the legend if not needed
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+</script>
+{% endblock %}
