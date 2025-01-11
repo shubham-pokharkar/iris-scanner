@@ -1,40 +1,40 @@
-<!-- templates/images.html -->
+    <!-- templates/images.html -->
 
-{% extends "base.html" %}
+    {% extends "base.html" %}
 
-{% block content %}
-<div class="container">
-    <h2 class="text-center mb-4">My Captured Eyes</h2>
-    {% if images %}
-        <div class="row">
-            {% for image in images %}
-                <div class="col-6 col-sm-4 col-md-3 mb-4">
-                    <div class="card">
-                        <img src="{{ url_for('static', filename='captured_eyes/' + image[0]) }}" class="card-img-top img-fluid" alt="Captured Eye">
-                        <div class="card-body">
-                            <p class="card-text mb-1"><strong>Eye Side:</strong> {{ image[1].capitalize() }}</p>
-                            {% if image[3] and image[4] %}
-                                <p class="card-text mb-1"><strong>Iris Radius:</strong> {{ image[3] }} px</p>
-                                <p class="card-text mb-1"><strong>Pupil Diameter:</strong> {{ image[4] }} px</p>
-                            {% else %}
-                                <p class="card-text mb-1 text-warning">Parameters not extracted.</p>
-                            {% endif %}
-                            <!-- Share Form -->
-                            <form action="{{ url_for('share', filename=image[0]) }}" method="POST" class="mt-2">
-                                <div class="input-group input-group-sm">
-                                    <input type="email" name="email" class="form-control" placeholder="Recipient Email" required>
-                                    <button type="submit" class="btn btn-outline-primary">
-                                        <i class="fas fa-share"></i> Share
-                                    </button>
-                                </div>
-                            </form>
+    {% block content %}
+    <div class="container">
+        <h2 class="text-center mb-4">My Captured Eyes</h2>
+        {% if images %}
+            <div class="row">
+                {% for image in images %}
+                    <div class="col-6 col-sm-4 col-md-3 mb-4">
+                        <div class="card">
+                            <img src="{{ url_for('static', filename='captured_eyes/' + image[0]) }}" class="card-img-top img-fluid" alt="Captured Eye">
+                            <div class="card-body">
+                                <p class="card-text mb-1"><strong>Eye Side:</strong> {{ image[1].capitalize() }}</p>
+                                {% if image[3] and image[4] %}
+                                    <p class="card-text mb-1"><strong>Iris Radius:</strong> {{ image[3] }} px</p>
+                                    <p class="card-text mb-1"><strong>Pupil Diameter:</strong> {{ image[4] }} px</p>
+                                {% else %}
+                                    <p class="card-text mb-1 text-warning">Parameters not extracted.</p>
+                                {% endif %}
+                                <!-- Share Form -->
+                                <form action="{{ url_for('share', filename=image[0]) }}" method="POST" class="mt-2">
+                                    <div class="input-group input-group-sm">
+                                        <input type="email" name="email" class="form-control" placeholder="Recipient Email" required>
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="fas fa-share"></i> Share
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-center">No images captured yet.</p>
-    {% endif %}
-</div>
-{% endblock %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">No images captured yet.</p>
+        {% endif %}
+    </div>
+    {% endblock %}

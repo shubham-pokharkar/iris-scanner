@@ -43,7 +43,6 @@ login_manager.login_view = 'login'
 SAVE_DIRECTORY = "captured_eyes"
 os.makedirs(SAVE_DIRECTORY, exist_ok=True)
 
-# app.py (continued)
 
 def init_db():
     conn = sqlite3.connect('database.db')
