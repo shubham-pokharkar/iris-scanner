@@ -1,5 +1,3 @@
-# app.py
-
 import base64
 import os
 from datetime import datetime
@@ -23,23 +21,20 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'  # Replace with a strong secret key
+app.config['SECRET_KEY'] = 'hihihihihihihihihihihihihi'
 
-# Flask-Mail Configuration
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Example for Gmail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your_email@gmail.com'  # Replace with your email
-app.config['MAIL_PASSWORD'] = 'your_email_password'  # Replace with your email password
+app.config['MAIL_USERNAME'] = 'shubham@gmail.com'
+app.config['MAIL_PASSWORD'] = 'hihihihihih'
 
 mail = Mail(app)
 
-# Flask-Login Configuration
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Directory to save captured eye images
 SAVE_DIRECTORY = "captured_eyes"
 os.makedirs(SAVE_DIRECTORY, exist_ok=True)
 
@@ -47,7 +42,7 @@ os.makedirs(SAVE_DIRECTORY, exist_ok=True)
 def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    # Users table
+
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,7 +50,7 @@ def init_db():
             password TEXT NOT NULL
         )
     ''')
-    # Images table
+
     c.execute('''
         CREATE TABLE IF NOT EXISTS images (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,39 +61,27 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     ''')
-    # Add new columns for iris_radius and pupil_diameter if they don't exist
+
     try:
         c.execute("ALTER TABLE images ADD COLUMN iris_radius REAL")
     except sqlite3.OperationalError:
-        pass  # Column already exists
+        pass
     try:
         c.execute("ALTER TABLE images ADD COLUMN pupil_diameter REAL")
     except sqlite3.OperationalError:
-        pass  # Column already exists
+        pass 
     conn.commit()
     conn.close()
 
 init_db()
 
-
-# app.py (continued)
-
 def extract_eye_parameters(image_path):
-    """
-    Extract iris radius and pupil diameter from the cropped eye image using advanced preprocessing.
-    
-    Args:
-        image_path (str): Path to the cropped eye image.
-    
-    Returns:
-        dict: Dictionary containing 'iris_radius' and 'pupil_diameter'.
-    """
+  
     params = {
         'iris_radius': None,
         'pupil_diameter': None
     }
 
-    # Read the image
     image = cv2.imread(image_path)
     if image is None:
         print(f"Error: Unable to read image at {image_path}")
@@ -106,65 +89,53 @@ def extract_eye_parameters(image_path):
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Improve contrast using CLAHE (Contrast Limited Adaptive Histogram Equalization)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     gray = clahe.apply(gray)
 
-    # Apply Gaussian Blur to reduce noise
     gray = cv2.GaussianBlur(gray, (7, 7), 0)
 
-    # Adaptive Thresholding for better edge detection under varying lighting
     thresh = cv2.adaptiveThreshold(gray, 255, 
                                    cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                    cv2.THRESH_BINARY_INV, 
                                    11, 2)
 
-    # Morphological operations to remove small noises
     kernel = np.ones((3,3), np.uint8)
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
 
-    # Edge Detection using Canny
     edges = cv2.Canny(gray, 100, 200)
 
-    # Combine threshold and edges for better circle detection
     combined = cv2.bitwise_or(thresh, edges)
 
-    # Morphological closing to fill gaps
     combined = cv2.morphologyEx(combined, cv2.MORPH_CLOSE, kernel, iterations=1)
 
-    # Detect circles for the pupil
     circles = cv2.HoughCircles(
         combined,
         cv2.HOUGH_GRADIENT,
-        dp=1.2,             # Slightly higher to improve detection
-        minDist=image.shape[1]//4,  # Adjust based on eye width
+        dp=1.2,          
+        minDist=image.shape[1]//4, 
         param1=50,
-        param2=30,          # Increased to reduce false detections
-        minRadius=10,       # Adjust based on eye image resolution
-        maxRadius=40        # Adjust based on eye image resolution
+        param2=30,          
+        minRadius=10,     
+        maxRadius=40 
     )
 
     if circles is not None:
         circles = np.uint16(np.around(circles))
-        # Sort circles based on radius (smallest first - pupil)
         circles = sorted(circles[0], key=lambda x: x[2])
         pupil = circles[0]
-        params['pupil_diameter'] = pupil[2] * 2  # Diameter
+        params['pupil_diameter'] = pupil[2] * 2
 
-        # Assuming the iris is the next larger circle
         if len(circles) > 1:
             iris = circles[1]
-            params['iris_radius'] = iris[2]  # Radius
+            params['iris_radius'] = iris[2]
 
-        # Debugging: Draw detected circles
-        cv2.circle(image, (pupil[0], pupil[1]), pupil[2], (0, 255, 0), 2)  # Pupil
-        cv2.circle(image, (pupil[0], pupil[1]), 2, (0, 0, 255), 3)           # Pupil center
+        cv2.circle(image, (pupil[0], pupil[1]), pupil[2], (0, 255, 0), 2)  
+        cv2.circle(image, (pupil[0], pupil[1]), 2, (0, 0, 255), 3)
 
         if len(circles) > 1:
-            cv2.circle(image, (iris[0], iris[1]), iris[2], (255, 0, 0), 2)    # Iris
-            cv2.circle(image, (iris[0], iris[1]), 2, (0, 0, 255), 3)          # Iris center
+            cv2.circle(image, (iris[0], iris[1]), iris[2], (255, 0, 0), 2)  
+            cv2.circle(image, (iris[0], iris[1]), 2, (0, 0, 255), 3)
 
-        # Save the image with drawn circles for debugging
         debug_image_path = os.path.join(SAVE_DIRECTORY, f"debug_{os.path.basename(image_path)}")
         cv2.imwrite(debug_image_path, image)
     else:
@@ -173,14 +144,12 @@ def extract_eye_parameters(image_path):
     return params
 
 
-# User Model for Flask-Login
 class User(UserMixin):
     def __init__(self, id, username, password):
         self.id = id
         self.username = username
         self.password = password
 
-# User Loader Callback
 @login_manager.user_loader
 def load_user(user_id):
     conn = sqlite3.connect('database.db')
@@ -192,7 +161,6 @@ def load_user(user_id):
         return User(id=user[0], username=user[1], password=user[2])
     return None
 
-# Registration Form
 class RegisterForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=4, max=20)],
                            render_kw={"placeholder": "Username"})
@@ -209,7 +177,6 @@ class RegisterForm(FlaskForm):
         if user:
             raise ValidationError("Username already exists.")
 
-# Login Form
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=4, max=20)],
                            render_kw={"placeholder": "Username"})
@@ -217,13 +184,10 @@ class LoginForm(FlaskForm):
                              render_kw={"placeholder": "Password"})
     submit = SubmitField("Login")
 
-# Routes
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        # Corrected hashing method here
         hashed_password = generate_password_hash(form.password.data, method='pbkdf2:sha256')
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
@@ -346,7 +310,6 @@ def share(filename):
         if not recipient:
             return jsonify({'success': False, 'message': 'No recipient email provided.'}), 400
 
-        # Check if the file exists and belongs to the user
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
         c.execute("SELECT * FROM images WHERE filename = ? AND user_id = ?", (filename, current_user.id))
@@ -355,7 +318,6 @@ def share(filename):
         if not image:
             return jsonify({'success': False, 'message': 'Image not found or access denied.'}), 404
 
-        # Send Email with Attachment
         msg = Message('Your Captured Eye Image',
                       sender=app.config['MAIL_USERNAME'],
                       recipients=[recipient])
@@ -382,7 +344,6 @@ def analytics():
     daily_counts = c.fetchall()
     conn.close()
 
-    # Prepare data for charts
     eye_labels = [row[0].capitalize() + " Eye" for row in eye_counts]
     eye_data = [row[1] for row in eye_counts]
 

@@ -165,6 +165,6 @@ def extract_eye_parameters_comprehensive(image_path, pixels_per_mm=None):
 # Example usage
 if __name__ == "__main__":
     image_path = r"c:/Users/dell/Pictures/Camera Roll/test.jpg"
-    pixels_per_mm = 10  # Example calibration factor, replace with your actual value
+    pixels_per_mm = 10 
     eye_params = extract_eye_parameters_comprehensive(image_path, pixels_per_mm)
     print(eye_params)

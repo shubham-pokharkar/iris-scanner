@@ -1,7 +1,4 @@
-// static/js/script.js
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Selecting DOM elements
     const video = document.getElementById('video');
     const overlay = document.getElementById('overlay');
     const captureBtn = document.getElementById('capture-btn');
@@ -11,18 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveImageBtn = document.getElementById('save-image-btn');
     const darkModeToggle = document.getElementById('darkModeToggle');
     
-    // Modal Elements
     const confirmationModalElement = document.getElementById('confirmationModal');
     const confirmationModal = new bootstrap.Modal(confirmationModalElement);
     
-    // Toast Element
     const toastElement = document.getElementById('toast');
     const toast = new bootstrap.Toast(toastElement);
     
-    // Eye Selection
     let selectedEye = 'left';
     
-    // Event listeners for eye selection radio buttons
     const eyeOptionRadios = document.getElementsByName('eyeOptions');
     eyeOptionRadios.forEach(radio => {
         radio.addEventListener('change', (event) => {
@@ -31,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Mediapipe Face Mesh Initialization
     const faceMesh = new FaceMesh({
         locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
@@ -45,18 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
         minTrackingConfidence: 0.5
     });
     
-    // Canvas for Drawing
     const canvasCtx = overlay.getContext('2d');
     
-    // Define Facemesh Connections for Left and Right Eyes
     const FACEMESH_LEFT_EYE = [33, 133, 160, 159, 158, 157, 173, 144, 145, 153, 154, 155, 133];
     const FACEMESH_RIGHT_EYE = [362, 263, 387, 386, 385, 384, 398, 373, 374, 380, 381, 382, 263];
     
-    // Flag to enable capture
     let isEyeCentered = false;
     let isEyeBlinking = false;
     
-    // Variables to store eye bounding box
     let eyeBoundingBox = {
         xMin: 0,
         yMin: 0,
@@ -64,12 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
         height: 0
     };
     
-    // Define EAR Threshold for Blink Detection
-    const EAR_THRESHOLD = 0.25; // Adjust based on testing
+    const EAR_THRESHOLD = 0.25; 
     let blinkCounter = 0;
-    let blinkLimit = 1; // Number of frames the eye must be closed to consider a blink
+    let blinkLimit = 1;
     
-    // Dark Mode Handling
     if (localStorage.getItem('darkMode') === 'enabled') {
         document.body.classList.add('dark-mode');
         darkModeToggle.checked = true;
@@ -85,14 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Function to Initialize or Restart Camera with Fixed Resolution
     const initializeCamera = (width = 480, height = 360) => {
-        camera.stop(); // Stop any existing camera instance
+        camera.stop(); 
         camera.start({
             width: width,
             height: height
         });
-        // Update video and canvas dimensions
         video.width = width;
         video.height = height;
         overlay.width = width;
@@ -101,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasCtx.clearRect(0, 0, overlay.width, overlay.height);
     };
     
-    // Start Camera using Mediapipe's Camera Utils with Fixed Resolution
     const camera = new Camera(video, {
         onFrame: async () => {
             try {
@@ -115,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     camera.start();
     
-    // Face Mesh Results
     faceMesh.onResults(results => {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, overlay.width, overlay.height);
@@ -124,10 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const landmarks = results.multiFaceLandmarks[0];
             const eyeIndices = selectedEye === 'left' ? FACEMESH_LEFT_EYE : FACEMESH_RIGHT_EYE;
             
-            // Extract eye landmarks
             const eyeLandmarks = eyeIndices.map(index => landmarks[index]);
 
-            // EAR Calculation
             let EAR = 0;
             if (selectedEye === 'left') {
                 const top = landmarks[159];
@@ -147,17 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 EAR = vertical / horizontal;
             }
 
-            // Blink Detection
             if (EAR < EAR_THRESHOLD) {
                 blinkCounter += 1;
                 if (blinkCounter >= blinkLimit) {
-                    if (!isEyeBlinking) { // Prevent multiple toasts
+                    if (!isEyeBlinking) {
                         isEyeBlinking = true;
                         isEyeCentered = false;
                         captureBtn.disabled = true;
                         captureBtn.classList.remove('btn-success');
                         captureBtn.classList.add('btn-secondary');
-                        // Display a toast notification immediately
                         toastElement.querySelector('.toast-body').textContent = 'Please keep your eye open to capture.';
                         toastElement.classList.remove('text-bg-success', 'text-bg-primary', 'text-bg-warning');
                         toastElement.classList.add('text-bg-warning');
@@ -168,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (blinkCounter >= blinkLimit) {
                     if (isEyeBlinking) { // Prevent multiple toasts
                         isEyeBlinking = false;
-                        // Optionally, inform user that eye is open again
                         toastElement.querySelector('.toast-body').textContent = 'Eye is open. You can capture now.';
                         toastElement.classList.remove('text-bg-warning', 'text-bg-danger');
                         toastElement.classList.add('text-bg-success');
@@ -178,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 blinkCounter = 0;
             }
 
-            // Calculate bounding box with scaling
             const xCoords = eyeLandmarks.map(lm => lm.x * overlay.width);
             const yCoords = eyeLandmarks.map(lm => lm.y * overlay.height);
             const xMin = Math.min(...xCoords);
@@ -196,12 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 height: height
             };
 
-            // Draw eye landmarks and connectors
             const FACEMESH_EYE_CONNECTIONS = selectedEye === 'left' ? FACEMESH_LEFT_EYE : FACEMESH_RIGHT_EYE;
             drawConnectors(canvasCtx, landmarks, FACEMESH_EYE_CONNECTIONS, {color: '#00c853', lineWidth: 1});
             drawLandmarks(canvasCtx, landmarks, {color: '#ff0000', lineWidth: 1});
 
-            // Define Alignment Box Coordinates (25% to 75% width, 20% to 80% height)
             const alignmentBox = {
                 xMin: overlay.width * 0.25,
                 xMax: overlay.width * 0.75,
@@ -209,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 yMax: overlay.height * 0.8
             };
 
-            // Check if eye is within the alignment box and not blinking
             if (
                 xMin > alignmentBox.xMin && 
                 (xMax < alignmentBox.xMax) && 

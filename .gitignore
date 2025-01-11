@@ -3,3 +3,4 @@ node_modules/
 __pycache__/
 *.tmp
 captured_eyes/
+database.db

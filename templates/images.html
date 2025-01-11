@@ -1,4 +1,3 @@
-    <!-- templates/images.html -->
 
     {% extends "base.html" %}
 
@@ -19,7 +18,7 @@
                                 {% else %}
                                     <p class="card-text mb-1 text-warning">Parameters not extracted.</p>
                                 {% endif %}
-                                <!-- Share Form -->
+                               
                                 <form action="{{ url_for('share', filename=image[0]) }}" method="POST" class="mt-2">
                                     <div class="input-group input-group-sm">
                                         <input type="email" name="email" class="form-control" placeholder="Recipient Email" required>
